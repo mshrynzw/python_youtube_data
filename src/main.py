@@ -25,8 +25,7 @@ if __name__ == '__main__':
     youtube = build('youtube', 'v3', developerKey=API_KEY)
 
     # チャンネルIDを指定
-    # channel_id = 'UCxBR2bnAFAavDHpHtQrTA9Q'
-    channel_id = 'UCYTximhpSat0HHFPAI0UpUA'
+    channel_id = ''
 
     # Firebase初期化
     initialize_firebase()
