@@ -6,6 +6,11 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 from googleapiclient.errors import HttpError
+import sys
+import io
+
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
 
 def set_common():
@@ -16,14 +21,40 @@ def set_common():
 
 
 def set_log():
-    if not os.path.isdir('./log/'):
-        os.mkdir('./log/')
+    # ログファイルの絶対パスを取得
+    log_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'logs', 'youtube_data.log')
 
-    with open('./conf/log.json', 'r') as f:
-        log_conf = json.load(f)
-    log_conf["handlers"]["fileHandler"]["filename"] = './log/{}.log'.format(datetime.utcnow().strftime("%Y%m%d%H%M%S"))
-
-    return log_conf
+    log_config = {
+        'version': 1,
+        'formatters': {
+            'detailed': {
+                'format': '%(asctime)s %(name)s:%(lineno)d %(levelname)s: %(message)s',
+                'datefmt': '%Y-%m-%d %H:%M:%S'
+            }
+        },
+        'handlers': {
+            'console': {
+                'class': 'logging.StreamHandler',
+                'level': 'INFO',
+                'formatter': 'detailed',
+                'stream': 'ext://sys.stdout'
+            },
+            'file': {
+                'class': 'logging.FileHandler',
+                'level': 'INFO',
+                'formatter': 'detailed',
+                'filename': log_file,
+                'encoding': 'utf-8'
+            }
+        },
+        'loggers': {
+            '': {
+                'handlers': ['console', 'file'],
+                'level': 'INFO'
+            }
+        }
+    }
+    return log_config
 
 
 def get_channel_videos(youtube, channel_id, logger, published_after):
@@ -85,7 +116,7 @@ def get_video_details(logger, youtube, video_id):
         like_count = int(video_info['statistics'].get('likeCount', 0))
 
         logger.info(f'id: {video_id}')
-        logger.info(f'title: {title}')
+        logger.info(f'title: {repr(title)}')  # repr()を使用してUnicode文字をエスケープ
         logger.info(f'published: {published_at.strftime("%Y-%m-%d %H:%M:%S")}')
         logger.info(f'views: {view_count}')
         logger.info(f'comments: {comment_count}')

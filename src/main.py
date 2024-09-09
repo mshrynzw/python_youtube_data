@@ -7,6 +7,10 @@ from dotenv import load_dotenv
 from googleapiclient.discovery import build
 from datetime import datetime, timezone
 
+# ログディレクトリを作成
+log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'logs')
+os.makedirs(log_dir, exist_ok=True)
+
 # ログ設定を適用
 logging.config.dictConfig(set_log())
 logger = logging.getLogger(__name__)
@@ -21,13 +25,14 @@ if __name__ == '__main__':
     youtube = build('youtube', 'v3', developerKey=API_KEY)
 
     # チャンネルIDを指定
-    channel_id = 'UCxBR2bnAFAavDHpHtQrTA9Q'
+    # channel_id = 'UCxBR2bnAFAavDHpHtQrTA9Q'
+    channel_id = 'UCYTximhpSat0HHFPAI0UpUA'
 
     # Firebase初期化
     initialize_firebase()
 
-    # 2023年1月1日以降の動画を取得（UTCで設定）
-    published_after = datetime(2023, 1, 1, tzinfo=timezone.utc)
+    # 年月日以降の動画を取得（UTCで設定）
+    published_after = datetime(2019, 1, 1, tzinfo=timezone.utc)
 
     # チャンネルの動画を取得
     all_videos = get_channel_videos(youtube, channel_id, logger, published_after)
