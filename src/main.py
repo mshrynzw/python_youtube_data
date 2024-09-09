@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 import os
 import logging
-from common import set_log, set_common, get_channel_videos, get_video_details, initialize_firebase, \
-    update_firestore_video
+from common import set_log, set_common, get_channel_videos, get_video_details, initialize_firebase, update_firestore_video
 from logging import config
 from dotenv import load_dotenv
 from googleapiclient.discovery import build
+from datetime import datetime, timezone
 
 # ログ設定を適用
 logging.config.dictConfig(set_log())
@@ -26,8 +26,11 @@ if __name__ == '__main__':
     # Firebase初期化
     initialize_firebase()
 
-    # チャンネルの全動画を取得
-    all_videos = get_channel_videos(channel_id, logger, youtube)
+    # 2023年1月1日以降の動画を取得（UTCで設定）
+    published_after = datetime(2023, 1, 1, tzinfo=timezone.utc)
+
+    # チャンネルの動画を取得
+    all_videos = get_channel_videos(youtube, channel_id, logger, published_after)
 
     # 取得した動画IDのリストを作成
     video_ids = [item['id']['videoId'] for item in all_videos]

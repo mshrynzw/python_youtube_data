@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
@@ -26,17 +26,21 @@ def set_log():
     return log_conf
 
 
-def get_channel_videos(channel_id, logger, youtube):
+def get_channel_videos(youtube, channel_id, logger, published_after):
     all_videos = []
     next_page_token = None
 
     try:
+        # publishedAfterの形式を修正
+        published_after_str = published_after.strftime('%Y-%m-%dT%H:%M:%SZ')
+
         while True:
             search_response = youtube.search().list(
                 channelId=channel_id,
                 type='video',
                 part='id,snippet',
                 order='date',
+                publishedAfter=published_after_str,
                 maxResults=50,
                 pageToken=next_page_token
             ).execute()
@@ -69,9 +73,13 @@ def get_video_details(logger, youtube, video_id):
             id=video_id
         ).execute()
 
+        if not video_response['items']:
+            logger.warning(f"動画ID {video_id} の情報が見つかりませんでした。")
+            return None
+
         video_info = video_response['items'][0]
         title = video_info['snippet']['title']
-        published_at = datetime.strptime(video_info['snippet']['publishedAt'], '%Y-%m-%dT%H:%M:%SZ')
+        published_at = datetime.strptime(video_info['snippet']['publishedAt'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=timezone.utc)
         view_count = int(video_info['statistics'].get('viewCount', 0))
         comment_count = int(video_info['statistics'].get('commentCount', 0))
         like_count = int(video_info['statistics'].get('likeCount', 0))
