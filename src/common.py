@@ -57,13 +57,14 @@ def set_log():
     return log_config
 
 
-def get_channel_videos(youtube, channel_id, logger, published_after):
+def get_channel_videos(youtube, channel_id, logger, published_after, published_before):
     all_videos = []
     next_page_token = None
 
     try:
         # publishedAfterの形式を修正
         published_after_str = published_after.strftime('%Y-%m-%dT%H:%M:%SZ')
+        published_before_str = published_before.strftime('%Y-%m-%dT%H:%M:%SZ')
 
         while True:
             search_response = youtube.search().list(
@@ -72,6 +73,7 @@ def get_channel_videos(youtube, channel_id, logger, published_after):
                 part='id,snippet',
                 order='date',
                 publishedAfter=published_after_str,
+                publishedBefore=published_before_str,
                 maxResults=50,
                 pageToken=next_page_token
             ).execute()
