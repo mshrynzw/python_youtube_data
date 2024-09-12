@@ -31,8 +31,8 @@ if __name__ == '__main__':
     initialize_firebase()
 
     # 年月日以降の動画を取得（UTCで設定）
-    published_after = datetime(2016, 1, 1, tzinfo=timezone.utc)
-    published_before = datetime(2018, 12, 31, tzinfo=timezone.utc)
+    published_after = datetime(2013, 1, 1, tzinfo=timezone.utc)
+    published_before = datetime(2024, 8, 31, tzinfo=timezone.utc)
 
     # チャンネルの動画を取得
     all_videos = get_channel_videos(youtube, channel_id, logger, published_after, published_before)
